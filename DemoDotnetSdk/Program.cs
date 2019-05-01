@@ -1,92 +1,98 @@
-﻿using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
-using System;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DemoDotnetSdk
 {
     class Program
     {
+        private static IDictionary<string, Func<Task>> DemoMethods;
         static void Main(string[] args)
         {
+            DemoMethods = new Dictionary<string, Func<Task>>();
+            DemoMethods.Add("DB", DatabasesDemo.Run);
+            DemoMethods.Add("CO", CollectionsDemo.Run);
+
             Task.Run(async () =>
+           {
+               ShowMenu();
+               var check = true;
+               while (check)
+               {
+                   Console.WriteLine("Selection: ");
+                   var input = Console.ReadLine();
+                   var demoId = input.ToUpper().Trim();
+                   switch (demoId)
+                   {
+                       case "DB":
+                           var demoMethod = DemoMethods[demoId];
+                           await RunDemo(demoMethod);
+                           break;
+                       case "Q":
+                           check = false;
+                           break;
+                       default:
+                           Console.WriteLine($"?{input}");
+                           break;
+                   }
+
+
+
+                   //if (demoId == "Q")
+                   //{
+                   //    break;
+                   //}
+                   //else
+                   //{
+                   //    Console.WriteLine($"?{input}");
+                   //}
+               }
+
+           }).Wait();
+
+        }
+
+        private async static Task RunDemo(Func<Task> demoMethod)
+        {
+            try
             {
-                Debugger.Break();
-                var endpoint = ConfigurationManager.AppSettings["CosmosDbEndpoint"];
-                var masterKey = ConfigurationManager.AppSettings["CosmosDbMasterKey"];
-
-                using (var client = new DocumentClient(new Uri(endpoint), masterKey))
-                {
-                    ViewDatabases(client);
-
-                    var databases = client.CreateDatabaseQuery().ToList();
-                    var checkCreateDatabase = true;
-                    var myNewDatabase = "MyNewDatabase";
-                    foreach (var database in databases)
-                    {
-                        if(database.Id == myNewDatabase)
-                        {
-                            checkCreateDatabase = false;
-                        }
-                    }
-                    if(checkCreateDatabase)
-                    {
-                        await CreateDatabase(client, myNewDatabase);
-                        ViewDatabases(client);
-                    }
-
-                    if (!checkCreateDatabase)
-                    {
-                        await DeleteDatabase(client);
-                    }
-                    
-                };
-            });
-
-            Console.ReadLine();
-
-        }
-
-        private async static Task DeleteDatabase(DocumentClient client)
-        {
-            Console.WriteLine();
-            Console.WriteLine(">>> Delete Database <<<");
-
-            var databaseUri = UriFactory.CreateDatabaseUri("MyNewDatabase");
-
-            
-            await client.DeleteDatabaseAsync(databaseUri);
-            Console.WriteLine("Already delete database");
-
-        }
-
-        private async static Task CreateDatabase(DocumentClient client, string MyNewDatabase)
-        {
-            Console.WriteLine();
-            Console.WriteLine(">>> Create Database <<<");
-
-            var databaseDefinition = new Database { Id = MyNewDatabase };
-            var result = await client.CreateDatabaseAsync(databaseDefinition);
-            var database = result.Resource;
-
-            Console.WriteLine($" Database Id: {database.Id}; Rid: {database.ResourceId}");
-        }
-
-        private static void ViewDatabases(DocumentClient client)
-        {
-            Console.WriteLine();
-            Console.WriteLine(">>> View Database <<<");
-
-            var databases = client.CreateDatabaseQuery().ToList();
-            foreach (var database in databases)
-            {
-                Console.WriteLine($" Database Id: {database.Id}; Rid: {database.ResourceId} ");
+                await demoMethod();
             }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                while(ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    message += Environment.NewLine + ex.Message;
+                }
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
             Console.WriteLine();
-            Console.WriteLine($"Total databases: {databases.Count}");
+            Console.Write("Done. Press any key to continue...");
+            Console.ReadKey(true);
+            Console.Clear();
+            ShowMenu();
         }
+
+        private static void ShowMenu()
+        {
+            Console.WriteLine(@"Cosmos DB SQL API .NET SDK demos
+
+DB Databases
+CO Collections
+DO Documents
+IX Indexing
+UP Users & Permissions
+
+C  Cleanup
+
+Q  Quit
+");
+        }
+
+
+
     }
 }
