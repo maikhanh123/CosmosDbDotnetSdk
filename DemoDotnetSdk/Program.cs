@@ -16,36 +16,25 @@ namespace DemoDotnetSdk
             Task.Run(async () =>
            {
                ShowMenu();
-               var check = true;
-               while (check)
+               while (true)
                {
                    Console.WriteLine("Selection: ");
                    var input = Console.ReadLine();
                    var demoId = input.ToUpper().Trim();
-                   switch (demoId)
+
+                   if (DemoMethods.Keys.Contains(demoId))
                    {
-                       case "DB":
-                           var demoMethod = DemoMethods[demoId];
-                           await RunDemo(demoMethod);
-                           break;
-                       case "Q":
-                           check = false;
-                           break;
-                       default:
-                           Console.WriteLine($"?{input}");
-                           break;
+                       var demoMethod = DemoMethods[demoId];
+                       await RunDemo(demoMethod);
                    }
-
-
-
-                   //if (demoId == "Q")
-                   //{
-                   //    break;
-                   //}
-                   //else
-                   //{
-                   //    Console.WriteLine($"?{input}");
-                   //}
+                   else if (demoId == "Q")
+                   {
+                       break;
+                   }
+                   else
+                   {
+                       Console.WriteLine($"?{input}");
+                   }
                }
 
            }).Wait();
@@ -61,7 +50,7 @@ namespace DemoDotnetSdk
             catch (Exception ex)
             {
                 var message = ex.Message;
-                while(ex.InnerException != null)
+                while (ex.InnerException != null)
                 {
                     ex = ex.InnerException;
                     message += Environment.NewLine + ex.Message;
