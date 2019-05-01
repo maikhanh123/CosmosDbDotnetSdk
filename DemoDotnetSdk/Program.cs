@@ -12,6 +12,7 @@ namespace DemoDotnetSdk
             DemoMethods = new Dictionary<string, Func<Task>>();
             DemoMethods.Add("DB", DatabasesDemo.Run);
             DemoMethods.Add("CO", CollectionsDemo.Run);
+            DemoMethods.Add("DO", DocumentsDemo.Run);
 
             Task.Run(async () =>
            {
