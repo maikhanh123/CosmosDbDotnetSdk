@@ -14,8 +14,8 @@ namespace DemoDotnetSdk
             DemoMethods.Add("CO", CollectionsDemo.Run);
             DemoMethods.Add("DO", DocumentsDemo.Run);
             DemoMethods.Add("IX", IndexDemo.Run);
-            //DemoMethods.Add("UP", UsersAndPermissionsDemo.Run);
-            //DemoMethods.Add("C", Cleanup.Run);
+            DemoMethods.Add("UP", UsersAndPermissionsDemo.Run);
+            DemoMethods.Add("C", Cleanup.Run);
 
             Task.Run(async () =>
            {

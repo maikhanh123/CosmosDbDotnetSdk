@@ -92,6 +92,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cleanup.cs" />
     <Compile Include="CollectionsDemo.cs" />
     <Compile Include="Customer.cs" />
     <Compile Include="DatabasesDemo.cs" />
